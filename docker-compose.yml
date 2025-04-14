@@ -1,41 +1,72 @@
-version: '3.8'
+# version: '3.8'
 
-services:
-  app:
-    image: evershop/evershop:latest
-    restart: always
-    environment:
-      DB_HOST: database
-      DB_PORT: 5432
-      DB_PASSWORD: postgres
-      DB_USER: postgres
-      DB_NAME: postgres
-    networks:
-      - myevershop
-    depends_on:
-      - database
-    ports:
-      - 3000:3000
+# services:
+#   app:
+#     image: evershop/evershop:latest
+#     restart: always
+#     environment:
+#       DB_HOST: database
+#       DB_PORT: 5432
+#       DB_PASSWORD: postgres
+#       DB_USER: postgres
+#       DB_NAME: postgres
+#     networks:
+#       - myevershop
+#     depends_on:
+#       - database
+#     ports:
+#       - 3000:3000
   
-  #The postgres database: 
-  database:
-    image: postgres:16
-    restart: unless-stopped
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+#   #The postgres database: 
+#   database:
+#     image: postgres:16
+#     restart: unless-stopped
+#     volumes:
+#       - postgres-data:/var/lib/postgresql/data
+#     environment:
+#       POSTGRES_PASSWORD: postgres
+#       POSTGRES_USER: postgres
+#       POSTGRES_DB: postgres
+#     ports:
+#       - "5432:5432"
+#     networks:
+#       - myevershop
+
+# networks:
+#   myevershop:
+#     name: MyEverShop
+
+
+
+version: '3.8'
+services:
+  db:
+    image: postgres:13
+    container_name: postgres-db
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: evershop
+      POSTGRES_USER: evershopuser
+      POSTGRES_PASSWORD: evershoppass
     ports:
       - "5432:5432"
-    networks:
-      - myevershop
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
-networks:
-  myevershop:
-    name: MyEverShop
-    driver: bridge
+  evershop:
+    build: .
+    container_name: evershop-app
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://evershopuser:evershoppass@db:5432/evershop
 
 volumes:
-  postgres-data:
+  pgdata:
+
+#     driver: bridge
+
+# volumes:
+#   postgres-data:
